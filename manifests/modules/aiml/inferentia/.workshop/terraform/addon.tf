@@ -59,6 +59,19 @@ module "karpenter" {
   }
 }
 
+module "aws-ebs-csi-driver" {
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.25.0//modules/kubernetes-addons/aws-ebs-csi-driver"
+
+  enable_amazon_eks_aws_ebs_csi_driver = true
+
+  addon_config = {
+    kubernetes_version = local.eks_cluster_version
+    preserve           = false
+  }
+
+  addon_context = local.addon_context
+}
+
 resource "aws_iam_instance_profile" "karpenter_node" {
   name = "${local.addon_context.eks_cluster_id}-karpenter-node"
   role = aws_iam_role.karpenter_node.name

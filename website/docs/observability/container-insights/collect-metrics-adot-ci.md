@@ -35,7 +35,9 @@ manifests/modules/observability/container-insights/adot/serviceaccount.yaml
 Create the resources:
 
 ```bash
-$ kubectl apply -k ~/environment/eks-workshop/modules/observability/container-insights/adot
+$ kubectl kustomize ~/environment/eks-workshop/modules/observability/container-insights/adot \
+  | envsubst | kubectl apply -f-
+$ kubectl rollout status -n other daemonset/adot-container-ci-collector --timeout=120s
 ```
 
 The specification for the collector is too long to show here, but you can view it like so:
@@ -52,11 +54,11 @@ $ kubectl -n other get opentelemetrycollector adot-container-ci -o jsonpath='{.s
 
 This is configuring an OpenTelemetry pipeline with the following structure:
 
-* Receivers
+- Receivers
   - [Container Insights receiver](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/awscontainerinsightreceiver/README.md) designed to collect performance log events using the Embedded Metric Format
-* Processors
+- Processors
   - Batch the metrics in to 60 second intervals
-* Exporters
+- Exporters
   - [CloudWatch EMF exporter](https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/awsemfexporter/README.md) which sends metrics to the CloudWatch API
 
 This collector is also configured to run as a DaemonSet with a collector agent running on each node:
@@ -74,4 +76,4 @@ adot-container-ci-collector-5lp5g  1/1     Running   0          15s
 adot-container-ci-collector-ctvgs  1/1     Running   0          15s
 ```
 
-If the output of this command includes multiple pods in the `Running` state as shown (above), the collector is running and collecting metrics from the cluster. The collector creates a log group named *aws/containerinsights/**cluster-name**/performance* and sends the metric data as performance log events in EMF format.
+If the output of this command includes multiple pods in the `Running` state as shown (above), the collector is running and collecting metrics from the cluster. The collector creates a log group named `aws/containerinsights/**cluster-name**/performance` and sends the metric data as performance log events in EMF format.

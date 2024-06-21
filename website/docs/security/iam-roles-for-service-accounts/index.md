@@ -1,8 +1,11 @@
 ---
 title: "IAM Roles for Service Accounts"
 sidebar_position: 20
-sidebar_custom_props: {"module": true}
+sidebar_custom_props: { "module": true }
+description: "Manage AWS credentials for your applications running on Amazon Elastic Kubernetes Service with IAM Roles for Service Accounts."
 ---
+
+{{% required-time %}}
 
 :::tip Before you start
 Prepare your environment for this section:
@@ -12,8 +15,9 @@ $ prepare-environment security/irsa
 ```
 
 This will make the following changes to your lab environment:
+
 - Create an Amazon DynamoDB table
-- Create an IAM role for AmazonEKS workloads to access the DynamoDB table
+- Create an IAM role for Amazon EKS workloads to access the DynamoDB table
 - Install the AWS Load Balancer Controller in the Amazon EKS cluster
 
 You can view the Terraform that applies these changes [here](https://github.com/VAR::MANIFESTS_OWNER/VAR::MANIFESTS_REPOSITORY/tree/VAR::MANIFESTS_REF/manifests/modules/security/irsa/.workshop/terraform).

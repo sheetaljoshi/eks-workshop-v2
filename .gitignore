@@ -33,3 +33,7 @@ env
 cdk.out
 
 .envrc
+node_modules
+test-output
+
+terraform-resources

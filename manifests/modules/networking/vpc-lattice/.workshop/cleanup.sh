@@ -2,17 +2,22 @@
 
 set -e
 
-echo "Deleting VPC Lattice routes and gateway..."
+logmessage "WARNING: Cleaning up the VPC Lattice module may take up to 10 minutes..."
 
-kubectl delete namespace checkoutv2 --ignore-not-found > /dev/null
+logmessage "Deleting VPC Lattice routes and gateway..."
 
-kubectl delete -f ~/environment/eks-workshop/modules/networking/vpc-lattice/routes --ignore-not-found > /dev/null
-cat ~/environment/eks-workshop/modules/networking/vpc-lattice/controller/eks-workshop-gw.yaml | envsubst | kubectl delete --ignore-not-found -f - > /dev/null
-kubectl delete -f ~/environment/eks-workshop/modules/networking/vpc-lattice/controller/gatewayclass.yaml --ignore-not-found > /dev/null
+kubectl delete namespace checkoutv2 --ignore-not-found
+kubectl delete namespace checkout --ignore-not-found
 
-echo "Waiting for VPC Lattice target groups to be deleted..."
+kubectl delete -f ~/environment/eks-workshop/modules/networking/vpc-lattice/routes --ignore-not-found
+cat ~/environment/eks-workshop/modules/networking/vpc-lattice/controller/eks-workshop-gw.yaml | envsubst | kubectl delete --ignore-not-found -f -
+kubectl delete -f ~/environment/eks-workshop/modules/networking/vpc-lattice/controller/gatewayclass.yaml --ignore-not-found
 
-timeout -s TERM 300 bash -c \
+delete-all-if-crd-exists targetgrouppolicies.application-networking.k8s.aws
+
+logmessage "Waiting for VPC Lattice target groups to be deleted..."
+
+timeout -s TERM 600 bash -c \
     'while [[ ! -z "$(aws vpc-lattice list-target-groups --output text | grep 'checkout' || true)" ]];\
     do sleep 10;\
     done'
@@ -20,34 +25,40 @@ timeout -s TERM 300 bash -c \
 helm_check=$(helm ls -A | grep 'gateway-api-controller' || true)
 
 if [ ! -z "$helm_check" ]; then
-  echo "Uninstalling Gateway API Controller helm chart..."
+  logmessage "Uninstalling Gateway API Controller helm chart..."
 
-  helm delete gateway-api-controller --namespace gateway-api-controller > /dev/null
+  helm delete gateway-api-controller --namespace gateway-api-controller
 fi
 
-#echo "Deleting VPC Lattice target groups..."
-
-#tg1=$(aws vpc-lattice list-target-groups --query "items[?name=='k8s-checkout-checkout'].id" --output text)
-#
-#if [ ! -z "$tg1" ]; then
-#  for id in $(aws vpc-lattice list-targets --target-group-identifier $tg1 --query 'items[].id' --output text); do
-#    aws vpc-lattice deregister-targets --target-group-identifier $tg1 --targets id=$id,port=8080 > /dev/null
-#  done
-#
-#  aws vpc-lattice delete-target-group --target-group-identifier $tg1 > /dev/null
-#fi
-#
-#tg2=$(aws vpc-lattice list-target-groups --query "items[?name=='k8s-checkout-checkoutv2'].id" --output text)
-#
-#if [ ! -z "$tg2" ]; then
-#  for id in $(aws vpc-lattice list-targets --target-group-identifier $tg2 --query 'items[].id' --output text); do
-#    aws vpc-lattice deregister-targets --target-group-identifier $tg2 --targets id=$id,port=8080 > /dev/null
-#  done
-#
-#  aws vpc-lattice delete-target-group --target-group-identifier $tg2 > /dev/null
-#fi
-
-PREFIX_LIST_ID=$(aws ec2 describe-managed-prefix-lists --query "PrefixLists[?PrefixListName=="\'com.amazonaws.$AWS_REGION.vpc-lattice\'"].PrefixListId" | jq --raw-output .[])
-MANAGED_PREFIX=$(aws ec2 get-managed-prefix-list-entries --prefix-list-id $PREFIX_LIST_ID --output json  | jq -r '.Entries[0].Cidr')
 CLUSTER_SG=$(aws eks describe-cluster --name $EKS_CLUSTER_NAME --output json| jq -r '.cluster.resourcesVpcConfig.clusterSecurityGroupId')
-aws ec2 revoke-security-group-ingress --group-id $CLUSTER_SG --cidr $MANAGED_PREFIX --protocol -1 > /dev/null
+
+PREFIX_LIST_ID=$(aws ec2 describe-managed-prefix-lists --query "PrefixLists[?PrefixListName=="\'com.amazonaws.$AWS_REGION.vpc-lattice\'"].PrefixListId" | jq -r '.[]')
+PREFIX_LIST_ID_IPV6=$(aws ec2 describe-managed-prefix-lists --query "PrefixLists[?PrefixListName=="\'com.amazonaws.$AWS_REGION.ipv6.vpc-lattice\'"].PrefixListId" | jq -r '.[]')
+
+ipv4_sg_check=$(aws ec2 describe-security-group-rules --filters Name="group-id",Values="$CLUSTER_SG" --query "SecurityGroupRules[?PrefixListId=='$PREFIX_LIST_ID'].SecurityGroupRuleId" --output text)
+
+if [ ! -z "$ipv4_sg_check" ]; then
+  aws ec2 revoke-security-group-ingress --group-id $CLUSTER_SG --ip-permissions "PrefixListIds=[{PrefixListId=${PREFIX_LIST_ID}}],IpProtocol=-1"
+fi
+
+ipv6_sg_check=$(aws ec2 describe-security-group-rules --filters Name="group-id",Values="$CLUSTER_SG" --query "SecurityGroupRules[?PrefixListId=='$PREFIX_LIST_ID_IPV6'].SecurityGroupRuleId" --output text)
+
+if [ ! -z "$ipv6_sg_check" ]; then
+  aws ec2 revoke-security-group-ingress --group-id $CLUSTER_SG --ip-permissions "PrefixListIds=[{PrefixListId=${PREFIX_LIST_ID_IPV6}}],IpProtocol=-1"
+fi
+
+export service_network=$(aws vpc-lattice list-service-networks --query "items[?name=="\'$EKS_CLUSTER_NAME\'"].id" | jq -r '.[]')
+if [ ! -z "$service_network" ]; then
+  association_id=$(aws vpc-lattice list-service-network-vpc-associations --service-network-identifier $service_network --vpc-identifier $VPC_ID --query 'items[].id' | jq -r '.[]')
+  if [ ! -z "$association_id" ]; then
+    logmessage "Deleting Lattice VPC association..."
+    aws vpc-lattice delete-service-network-vpc-association --service-network-vpc-association-identifier $association_id
+    timeout -s TERM 300 bash -c \
+      'while [[ ! -z "$(aws vpc-lattice list-service-network-vpc-associations --service-network-identifier $service_network --vpc-identifier $VPC_ID --query 'items[].id' --output text || true)" ]];\
+      do sleep 10;\
+      done'
+  fi
+
+  logmessage "Deleting Lattice service network..."
+  aws vpc-lattice delete-service-network --service-network-identifier $service_network
+fi

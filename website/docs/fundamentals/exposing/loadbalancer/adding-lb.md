@@ -21,7 +21,7 @@ Let's inspect the Service resources for the `ui` application again:
 $ kubectl get service -n ui
 ```
 
-We see two separate resources, with the new `ui-nlb` entry being of type `LoadBalancer`. Most importantly note it has an "external IP" value, this the DNS entry that can be used to access our application from outside the Kubernetes cluster.
+We see two separate resources, with the new `ui-nlb` entry being of type `LoadBalancer`. Most importantly note it has an "external IP" value, this is the DNS entry that can be used to access our application from outside the Kubernetes cluster.
 
 The NLB will take several minutes to provision and register its targets so take some time to inspect the load balancer resources the controller has created.
 
@@ -66,8 +66,8 @@ $ aws elbv2 describe-load-balancers --query 'LoadBalancers[?contains(LoadBalance
 
 What does this tell us?
 
-* The NLB is accessible over the public internet
-* It uses the public subnets in our VPC
+- The NLB is accessible over the public internet
+- It uses the public subnets in our VPC
 
 We can also inspect the targets in the target group that was created by the controller:
 

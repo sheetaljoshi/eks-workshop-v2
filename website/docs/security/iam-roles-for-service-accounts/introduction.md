@@ -1,6 +1,6 @@
 ---
 title: "Introduction"
-sidebar_position: 10
+sidebar_position: 21
 ---
 
 The `carts` component of our architecture uses Amazon DynamoDB as its storage backend, which is a common use-case you'll find for non-relational databases integration with Amazon EKS. The way in which the carts API is currently deployed uses a [lightweight version of Amazon DynamoDB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html) running as a container in the EKS cluster.
@@ -8,7 +8,7 @@ The `carts` component of our architecture uses Amazon DynamoDB as its storage ba
 You can see this by running the following command:
 
 ```bash
-$ kubectl -n carts get pod 
+$ kubectl -n carts get pod
 NAME                              READY   STATUS    RESTARTS        AGE
 carts-5d7fc9d8f-xm4hs             1/1     Running   0               14m
 carts-dynamodb-698674dcc6-hw2bg   1/1     Running   0               14m

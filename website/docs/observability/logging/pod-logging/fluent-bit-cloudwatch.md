@@ -17,7 +17,7 @@ deployment "ui" successfully rolled out
 Now we can check that our `ui` component is creating logs by directly using `kubectl logs`:
 
 ```bash
-$ kubectl logs -n ui deployment/ui 
+$ kubectl logs -n ui deployment/ui
 Picked up JAVA_TOOL_OPTIONS: -javaagent:/opt/aws-opentelemetry-agent.jar
 OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
 [otel.javaagent 2023-07-03 23:39:18:499 +0000] [main] INFO io.opentelemetry.javaagent.tooling.VersionLogger - opentelemetry-javaagent - version: 1.24.0-aws
@@ -44,12 +44,12 @@ https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups
 
 Filter for **fluentbit-cloudwatch** to find the log groups created by Fluent Bit:
 
-![CWLogGroup](./assets/log-group.png)
+![CloudWatch Log Group](./assets/log-group.png)
 
 Select `/aws/eks/fluentbit-cloudwatch/workload/ui` to view the log streams, each one corresponds to an individual pod:
 
-![CWLogStreams](./assets/log-streams.png)
+![CloudWatch Log Stream](./assets/log-streams.png)
 
 You can expand one of the log entries to see the full JSON payload:
 
-![Podlogs](./assets/logs.png)
+![Pod logs](./assets/logs.png)

@@ -1,6 +1,6 @@
 ---
 title: "Using DynamoDB"
-sidebar_position: 20
+sidebar_position: 22
 ---
 
 The first step in this process is to re-configure the `carts` service to use a DynamoDB table that has already been created for us. The application loads most of its confirmation from a ConfigMap, lets take look at it:
@@ -32,7 +32,8 @@ Let's check the value of `CARTS_DYNAMODB_TABLENAME` then run Kustomize to use th
 ```bash
 $ echo $CARTS_DYNAMODB_TABLENAME
 eks-workshop-carts
-$ kubectl apply -k ~/environment/eks-workshop/modules/security/irsa/dynamo
+$ kubectl kustomize ~/environment/eks-workshop/modules/security/irsa/dynamo \
+  | envsubst | kubectl apply -f-
 ```
 
 This will overwrite our ConfigMap with new values:
@@ -64,6 +65,7 @@ Let us try to access our application using the browser. A `LoadBalancer` type se
 $ kubectl get service -n ui ui-nlb -o jsonpath='{.status.loadBalancer.ingress[*].hostname}{"\n"}'
 k8s-ui-uinlb-647e781087-6717c5049aa96bd9.elb.us-west-2.amazonaws.com
 ```
+
 So now our application should be using DynamoDB right? Load it up in the browser using the output of the above command and navigate to the shopping cart:
 
 <browser url="http://k8s-ui-uinlb-647e781087-6717c5049aa96bd9.elb.us-west-2.amazonaws.com/cart">

@@ -33,7 +33,7 @@
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
+[data-theme="dark"] {
   --ifm-color-primary: #25c2a0;
   --ifm-color-primary-dark: #21af90;
   --ifm-color-primary-darker: #1fa588;
@@ -73,7 +73,7 @@
 }
 
 .header-github-link::before {
-  content: '';
+  content: "";
   width: 24px;
   height: 24px;
   display: flex;
@@ -163,7 +163,6 @@
 
 .info {
   background-color: #65afd3;
-
 }
 
 .lab {
@@ -185,4 +184,17 @@
 
 .navbar-sidebar__back {
   color: #d1d5db;
+}
+
+.close {
+  color: white;
+}
+
+/* Dark mode specific styles */
+[data-theme="dark"] img {
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+[class^="lightToggleIcon"] {
+  color: white;
 }

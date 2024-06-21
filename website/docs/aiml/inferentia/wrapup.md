@@ -1,6 +1,6 @@
 ---
-title: "Real World Implementation"
-sidebar_position: 50
+title: "Real world implementation"
+sidebar_position: 40
 ---
 
 In the previous sections we've seen how we can use Amazon EKS to build models for AWS Inferentia and deploy models on EKS using Inferentia nodes. In both these examples we've executed Python code inside our containers from our command-line. In a real world scenario we do not want to run these commands manually, but rather have the container execute the commands.

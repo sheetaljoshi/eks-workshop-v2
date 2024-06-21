@@ -2,16 +2,20 @@
 title: "Argo CD"
 sidebar_position: 3
 sidebar_custom_props: { "module": true }
+description: "Declarative, GitOps continuous delivery with ArgoCD on Amazon Elastic Kubernetes Service."
 ---
+
+{{% required-time %}}
 
 :::tip Before you start
 Prepare your environment for this section:
 
-```bash timeout=300 wait=120 hook=install
+```bash timeout=300 wait=120
 $ prepare-environment automation/gitops/argocd
 ```
 
 This will make the following changes to your lab environment:
+
 - Create an AWS CodeCommit repository
 - Install ArgoCD in the Amazon EKS cluster
 

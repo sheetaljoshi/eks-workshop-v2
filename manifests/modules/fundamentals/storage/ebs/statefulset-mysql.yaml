@@ -16,7 +16,7 @@ spec:
   serviceName: mysql
   template:
     metadata:
-      labels: 
+      labels:
         app.kubernetes.io/name: catalog
         app.kubernetes.io/instance: catalog
         app.kubernetes.io/component: mysql-ebs
@@ -25,9 +25,7 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: "public.ecr.aws/docker/library/mysql:5.7"
-          args: 
-            - "--ignore-db-dir=lost+found"
+          image: "public.ecr.aws/docker/library/mysql:8.0"
           imagePullPolicy: IfNotPresent
           env:
             - name: MYSQL_ROOT_PASSWORD
@@ -60,4 +58,4 @@ spec:
         storageClassName: gp2
         resources:
           requests:
-            storage: 30Gi 
+            storage: 30Gi

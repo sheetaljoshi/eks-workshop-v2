@@ -1,78 +1,84 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-var path = require('path');
+var path = require("path");
 
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
-const remarkCodeTerminal = require('./src/remark/code-terminal');
-const remarkIncludeCode = require('./src/remark/include-code');
-const remarkIncludeKustomization = require('./src/remark/include-kustomization');
-const remarkBlueprintsAddon = require('./src/remark/blueprints-addon');
-const remarkParameters = require('./src/remark/parameters');
+const lightCodeTheme = require("prism-react-renderer/themes/github");
+const darkCodeTheme = require("prism-react-renderer/themes/dracula");
+const remarkCodeTerminal = require("./src/remark/code-terminal");
+const remarkTime = require("./src/remark/time");
+const remarkIncludeCode = require("./src/remark/include-code");
+const remarkIncludeKustomization = require("./src/remark/include-kustomization");
+const remarkParameters = require("./src/remark/parameters");
 
-require('dotenv').config({ path: '.kustomize-env' })
+require("dotenv").config({ path: ".kustomize-env" });
 
-const rootDir = path.dirname(require.resolve('./package.json'));
+const rootDir = path.dirname(require.resolve("./package.json"));
 const manifestsDir = `${rootDir}/..`;
-const kustomizationsDir = `${manifestsDir}/manifests`
+const kustomizationsDir = `${manifestsDir}/manifests`;
 
-const manifestsRef = process.env.MANIFESTS_REF || 'main'
-const manifestsOwner = process.env.MANIFESTS_OWNER || 'aws-samples'
-const manifestsRepository = process.env.MANIFESTS_REPOSITORY || 'eks-workshop-v2'
+const manifestsRef = process.env.MANIFESTS_REF || "main";
+const manifestsOwner = process.env.MANIFESTS_OWNER || "aws-samples";
+const manifestsRepository =
+  process.env.MANIFESTS_REPOSITORY || "eks-workshop-v2";
+
+const labTimesEnabled = process.env.LAB_TIMES_ENABLED || false;
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'EKS Workshop',
+  title: "EKS Workshop",
   tagline:
-    'Practical exercises to learn about Amazon Elastic Kubernetes Service',
-  url: 'https://www.eksworkshop.com',
-  baseUrl: '/',
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/favicon.png',
+    "Practical exercises to learn about Amazon Elastic Kubernetes Service",
+  url: "https://www.eksworkshop.com",
+  baseUrl: "/",
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "warn",
+  favicon: "img/favicon.png",
   noIndex: process.env.ENABLE_INDEX !== "1",
 
-  organizationName: 'aws-samples',
-  projectName: 'eks-workshop-v2',
+  organizationName: "aws-samples",
+  projectName: "eks-workshop-v2",
 
-  plugins: ['docusaurus-plugin-sass'],
+  plugins: ["docusaurus-plugin-sass"],
 
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js'),
-          remarkPlugins: [remarkCodeTerminal],
+          sidebarPath: require.resolve("./sidebars.js"),
+          remarkPlugins: [
+            remarkCodeTerminal,
+            [remarkTime, { enabled: labTimesEnabled, factor: 1.25 }],
+          ],
           beforeDefaultRemarkPlugins: [
-            [remarkParameters, {
-              replacements: {
-                MANIFESTS_REF: manifestsRef,
-                MANIFESTS_OWNER: manifestsOwner,
-                MANIFESTS_REPOSITORY: manifestsRepository,
-                KUBERNETES_VERSION: '1.25',
-                KUBERNETES_NODE_VERSION: '1.25.6-eks-48e63af'
-              }
-            }],
+            [
+              remarkParameters,
+              {
+                replacements: {
+                  MANIFESTS_REF: manifestsRef,
+                  MANIFESTS_OWNER: manifestsOwner,
+                  MANIFESTS_REPOSITORY: manifestsRepository,
+                  KUBERNETES_VERSION: "1.29",
+                  KUBERNETES_NODE_VERSION: "1.29-eks-48e63af",
+                },
+              },
+            ],
             [remarkIncludeCode, { manifestsDir }],
             [remarkIncludeKustomization, { manifestsDir: kustomizationsDir }],
-            //[remarkBlueprintsAddon, {terraformDir: `${rootDir}/../terraform/local`}]
           ],
           editUrl:
-            'https://github.com/aws-samples/eks-workshop-v2/tree/main/website',
-          exclude: [
-            'fundamentals/storage/fsx-for-netapp-ontap'
-          ]
+            "https://github.com/aws-samples/eks-workshop-v2/tree/main/website",
+          exclude: ["security/guardduty/runtime-monitoring/reverse-shell.md"],
         },
         theme: {
-          customCss: require.resolve('./src/css/custom.scss'),
+          customCss: require.resolve("./src/css/custom.scss"),
         },
       }),
     ],
@@ -82,69 +88,76 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       colorMode: {
-        disableSwitch: true,
+        defaultMode: "light",
+        disableSwitch: false,
       },
-      image: 'img/meta.png',
+      metadata: [
+        {
+          name: "google-site-verification",
+          content: "aRMa1ddI7Lc-CtAWPgifuH7AhmyC1CVAEpg2d9jyTpQ",
+        },
+      ],
+      image: "img/meta.jpg",
       navbar: {
-        title: 'EKS Workshop',
+        title: "EKS Workshop",
         logo: {
-          alt: 'Amazon Web Services',
-          src: 'img/logo.svg',
+          alt: "Amazon Web Services",
+          src: "img/logo.svg",
         },
         items: [
           {
-            type: 'doc',
-            docId: 'introduction/index',
-            position: 'left',
-            label: 'Introduction',
+            type: "doc",
+            docId: "introduction/index",
+            position: "left",
+            label: "Introduction",
           },
           {
-            type: 'doc',
-            docId: 'fundamentals/index',
-            position: 'left',
-            label: 'Fundamentals',
+            type: "doc",
+            docId: "fundamentals/index",
+            position: "left",
+            label: "Fundamentals",
           },
           {
-            type: 'doc',
-            docId: 'autoscaling/index',
-            position: 'left',
-            label: 'Autoscaling',
+            type: "doc",
+            docId: "autoscaling/index",
+            position: "left",
+            label: "Autoscaling",
           },
           {
-            type: 'doc',
-            docId: 'observability/index',
-            position: 'left',
-            label: 'Observability',
+            type: "doc",
+            docId: "observability/index",
+            position: "left",
+            label: "Observability",
           },
           {
-            type: 'doc',
-            docId: 'security/index',
-            position: 'left',
-            label: 'Security',
+            type: "doc",
+            docId: "security/index",
+            position: "left",
+            label: "Security",
           },
           {
-            type: 'doc',
-            docId: 'networking/index',
-            position: 'left',
-            label: 'Networking',
+            type: "doc",
+            docId: "networking/index",
+            position: "left",
+            label: "Networking",
           },
           {
-            type: 'doc',
-            docId: 'automation/index',
-            position: 'left',
-            label: 'Automation',
+            type: "doc",
+            docId: "automation/index",
+            position: "left",
+            label: "Automation",
           },
           {
-            type: 'doc',
-            docId: 'aiml/index',
-            position: 'left',
-            label: 'AIML',
+            type: "doc",
+            docId: "aiml/index",
+            position: "left",
+            label: "AIML",
           },
           {
-            href: 'https://github.com/aws-samples/eks-workshop-v2',
-            position: 'right',
-            className: 'header-github-link',
-            'aria-label': 'GitHub repository',
+            href: "https://github.com/aws-samples/eks-workshop-v2",
+            position: "right",
+            className: "header-github-link",
+            "aria-label": "GitHub repository",
           },
         ],
       },
@@ -160,24 +173,24 @@ const config = {
       footer: {
         links: [
           {
-            title: 'Community',
+            title: "Community",
             items: [
               {
-                label: 'GitHub',
-                href: 'https://github.com/aws-samples/eks-workshop-v2',
+                label: "GitHub",
+                href: "https://github.com/aws-samples/eks-workshop-v2",
               },
             ],
           },
           {
-            title: 'Other',
+            title: "Other",
             items: [
               {
-                label: 'Site Terms',
-                href: 'https://aws.amazon.com/terms/?nc1=f_pr',
+                label: "Site Terms",
+                href: "https://aws.amazon.com/terms/?nc1=f_pr",
               },
               {
-                label: 'Privacy',
-                href: 'https://aws.amazon.com/privacy/?nc1=f_pr',
+                label: "Privacy",
+                href: "https://aws.amazon.com/privacy/?nc1=f_pr",
               },
             ],
           },
@@ -186,16 +199,17 @@ const config = {
       },
       prism: {
         theme: lightCodeTheme,
+        darkTheme: darkCodeTheme,
         magicComments: [
           // Remember to extend the default highlight class name as well!
           {
-            className: 'theme-code-block-highlighted-line',
-            line: 'highlight-next-line',
-            block: { start: 'highlight-start', end: 'highlight-end' },
+            className: "theme-code-block-highlighted-line",
+            line: "highlight-next-line",
+            block: { start: "highlight-start", end: "highlight-end" },
           },
           {
-            className: 'code-block-highlight',
-            line: 'HIGHLIGHT',
+            className: "code-block-highlight",
+            line: "HIGHLIGHT",
           },
         ],
       },
